@@ -41,7 +41,7 @@ sigma=6.8e-05
 
 def generate_spectrum(cube_name):
     freq=data1.loc[cube_name, 'freq']*10**9 # central frequency of the source in the cubelet
-    cubelet=SpectralCube.read('~/Desktop/HI/COSMOS_r0p5/'+str(cube_name)+'.r0p5.fits')
+    cubelet=SpectralCube.read('/Users/apple/Documents/GitHub/Mphys_HI/COSMOS_r0p5/'+str(cube_name)+'.r0p5.fits')
     bmaj=cubelet.header['BMAJ']*3600 # values in the header are in degrees, so we need to convert them to arcsec
     bmin=cubelet.header['BMIN']*3600
     bpa=cubelet.header['BPA']
@@ -71,12 +71,16 @@ def generate_spectrum(cube_name):
     cube_20 = cubelet.convolve_to(beam)
 
     #create mask cube -------------------------------------------
-    
+    subcube_20=cube_20[:,0:10,0:10]
+
+    rms = subcube_20.std(axis=(1,2))
+    sigma=np.mean(rms.value)
     include_mask = cube_20 > 3*sigma*cube_20.unit
 
     mask_cube = cube_20.with_mask(include_mask)
     #you can save the mask and examine it in ds9 
-    mask_cube.write('~/Desktop/HI/COSMOS_r0p5/'+str(cube_name)+'_revised_masked_cube.fits', format='fits',overwrite='True') 
+    print(1)
+    mask_cube.write('/Users/apple/Documents/GitHub/Mphys_HI/COSMOS_r0p5/'+str(cube_name)+'_revised_masked_cube.fits', format='fits',overwrite='True') 
 
     #generate spectrum -----------------------------------------
     spectrum_new_jy = mask_cube.sum(axis=(1,2))*bmpix
@@ -129,7 +133,7 @@ def generate_spectrum(cube_name):
 
     #plt.legend(loc=2, numpoints=1, prop={'size':12})
 
-    plt.savefig('/Users/apple/Desktop/HI/COSMOS_r0p5_spectrum/'+str(cube_name)+'_spectrum.pdf',format = 'pdf', bbox_inches = 'tight', transparent=True)
+    plt.savefig('/Users/apple/Documents/GitHub/Mphys_HI/COSMOS_r0p5_spectrum/'+str(cube_name)+'_spectrum.pdf',format = 'pdf', bbox_inches = 'tight', transparent=True)
 
 #to be finished difficulty:  different central frequencies for a list of cubes, need to be checked by eye
 #check whether we want to make this result first
@@ -213,7 +217,9 @@ def generate_morphology(cube_name):
     beam = radio_beam.Beam(major=bmaj*u.arcsec, minor=bmin*u.arcsec, pa=0*u.deg)
     #then we convolve our original cubelet with the new beam
     cube_20 = cubelet.convolve_to(beam)
-
+    subcube_20=cube_20[:,0:10,0:10]
+    rms = subcube_20.std(axis=(1,2))
+    sigma=np.mean(rms.value)
     #create mask cube -------------------------------------------
     
     include_mask = cube_20 > 3*sigma*cube_20.unit
