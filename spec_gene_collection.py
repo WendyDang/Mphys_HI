@@ -41,7 +41,7 @@ sigma=6.8e-05
 
 def generate_spectrum(cube_name):
     freq=data1.loc[cube_name, 'freq']*10**9 # central frequency of the source in the cubelet
-    cubelet=SpectralCube.read('/Users/apple/Documents/GitHub/Mphys_HI/COSMOS_r0p5/'+str(cube_name)+'.r0p5.fits')
+    cubelet=SpectralCube.read('/Users/apple/Documents/GitHub/Mphys_HI/COSMOS_r0p5/'+str(cube_name)+'_revised_masked_cube.fits')
     bmaj=cubelet.header['BMAJ']*3600 # values in the header are in degrees, so we need to convert them to arcsec
     bmin=cubelet.header['BMIN']*3600
     bpa=cubelet.header['BPA']
@@ -66,24 +66,24 @@ def generate_spectrum(cube_name):
     #Convolve with new beam---------------------------------------
     # we define the new beam, which is 20 x 20 arcsec
     # I didn't convolve here because of ValueError: Beam could not be deconvolved
-    beam = radio_beam.Beam(major=bmaj*u.arcsec, minor=bmin*u.arcsec, pa=0*u.deg)
-    #then we convolve our original cubelet with the new beam
-    cube_20 = cubelet.convolve_to(beam)
+    # beam = radio_beam.Beam(major=bmaj*u.arcsec, minor=bmin*u.arcsec, pa=0*u.deg)
+    # #then we convolve our original cubelet with the new beam
+    # cube_20 = cubelet.convolve_to(beam)
 
-    #create mask cube -------------------------------------------
-    subcube_20=cube_20[:,0:15,0:15]
+    # #create mask cube -------------------------------------------
+    # subcube_20=cube_20[:,0:15,0:15]
 
-    rms = subcube_20.std(axis=(1,2))
-    sigma=np.mean(rms.value)
-    include_mask = cube_20 > 3*sigma*cube_20.unit
+    # rms = subcube_20.std(axis=(1,2))
+    # sigma=np.mean(rms.value)
+    # include_mask = cube_20 > 3*sigma*cube_20.unit
 
-    mask_cube = cube_20.with_mask(include_mask)
-    #you can save the mask and examine it in ds9 
-    print(1)
-    mask_cube.write('/Users/apple/Documents/GitHub/Mphys_HI/COSMOS_r0p5/'+str(cube_name)+'_revised_masked_cube.fits', format='fits',overwrite='True') 
+    # mask_cube = cube_20.with_mask(include_mask)
+    # #you can save the mask and examine it in ds9 
+    # print(1)
+    #mask_cube.write('/Users/apple/Documents/GitHub/Mphys_HI/COSMOS_r0p5/'+str(cube_name)+'_revised_masked_cube.fits', format='fits',overwrite='True') 
 
     #generate spectrum -----------------------------------------
-    spectrum_new_jy = mask_cube.sum(axis=(1,2))*bmpix
+    spectrum_new_jy = cubelet.sum(axis=(1,2))*bmpix
     spectrum_new_jy_converted = np.nan_to_num(spectrum_new_jy.value)
     v_arr1 = cubelet.spectral_axis.value
 
