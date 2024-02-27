@@ -71,7 +71,7 @@ def generate_spectrum(cube_name):
     cube_20 = cubelet.convolve_to(beam)
 
     #create mask cube -------------------------------------------
-    subcube_20=cube_20[:,0:10,0:10]
+    subcube_20=cube_20[:,0:15,0:15]
 
     rms = subcube_20.std(axis=(1,2))
     sigma=np.mean(rms.value)
